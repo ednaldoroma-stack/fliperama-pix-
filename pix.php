@@ -32,7 +32,7 @@ if ($acao == 'gerar') {
         "Authorization: Bearer " . TOKEN_MERCADOPAGO,
         "Content-Type: application/json",
         "X-Idempotency-Key: " . $id_transacao,
-        "X-Melicountry: MLA" // Adiciona o cabeçalho explícito para forçar roteamento correto
+        "X-Melicountry: MLB" // Adiciona o cabeçalho explícito para forçar roteamento correto
     ];
 
     $ch = curl_init();
