@@ -6,24 +6,23 @@ define('ARQUIVO_STATUS', 'status_pagamento.txt');
 
 $acao = isset($_GET['acao']) ? $_GET['acao'] : '';
 
-// 1. AÇÃO: GERAR UM NOVO PIX FORÇANDO BRASIL
+// 1. AÇÃO: GERAR UM NOVO PIX CORRIGIDO
 if ($acao == 'gerar') {
+    // URL com a barra obrigatória no final exigida pelo Mercado Pago corporativo
     $url = "https://mercadopago.com";
     $id_transacao = time() . rand(100, 999);
     
-    // Forçando a moeda local e dados estruturados no formato brasileiro
     $dados = [
         "transaction_amount" => VALOR_CREDITO,
         "description" => "Credito Fliperama Pix",
         "payment_method_id" => "pix",
-        "currency_id" => "BRL", // FORÇA A MOEDA EM REAL BRASILEIRO
         "payer" => [
-            "email" => "test_user_fliperama@testuser.com", // Padrão aceito pela API
+            "email" => "test_user_fliperama@testuser.com",
             "first_name" => "Jogador",
             "last_name" => "Fliper",
             "identification" => [
                 "type" => "CPF", 
-                "number" => "19100000000" // CPF fictício válido para testes da API brasileira
+                "number" => "19100000000"
             ]
         ]
     ];
@@ -31,8 +30,7 @@ if ($acao == 'gerar') {
     $headers = [
         "Authorization: Bearer " . TOKEN_MERCADOPAGO,
         "Content-Type: application/json",
-        "X-Idempotency-Key: " . $id_transacao,
-        "X-Melicountry: MLB" // Adiciona o cabeçalho explícito para forçar roteamento correto
+        "X-Idempotency-Key: " . $id_transacao
     ];
 
     $ch = curl_init();
@@ -41,7 +39,8 @@ if ($acao == 'gerar') {
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
     curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($dados));
-    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, false); 
+    // Permitir o redirecionamento apenas interno da API limpa
+    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true); 
     $resposta = curl_exec($ch);
     curl_close($ch);
 
@@ -74,7 +73,7 @@ if ($acao == 'checar') {
         exit;
     }
 
-    $url = "https://mercadopago.com/" . $payment_id;
+    $url = "https://mercadopago.com" . $payment_id;
     $headers = ["Authorization: Bearer " . TOKEN_MERCADOPAGO];
 
     $ch = curl_init();
