@@ -41,7 +41,7 @@ if ($acao == 'gerar') {
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
     curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($dados));
-    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true); 
+    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, false); 
     $resposta = curl_exec($ch);
     curl_close($ch);
 
