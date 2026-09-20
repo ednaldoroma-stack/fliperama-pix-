@@ -6,28 +6,33 @@ define('ARQUIVO_STATUS', 'status_pagamento.txt');
 
 $acao = isset($_GET['acao']) ? $_GET['acao'] : '';
 
-// 1. AÇÃO: GERAR UM NOVO PIX
+// 1. AÇÃO: GERAR UM NOVO PIX FORÇANDO BRASIL
 if ($acao == 'gerar') {
-    // Forçando o endpoint correto e direto da API do Mercado Pago
     $url = "https://mercadopago.com";
     $id_transacao = time() . rand(100, 999);
     
+    // Forçando a moeda local e dados estruturados no formato brasileiro
     $dados = [
         "transaction_amount" => VALOR_CREDITO,
         "description" => "Credito Fliperama Pix",
         "payment_method_id" => "pix",
+        "currency_id" => "BRL", // FORÇA A MOEDA EM REAL BRASILEIRO
         "payer" => [
-            "email" => "fliperama@teste.com",
+            "email" => "test_user_fliperama@testuser.com", // Padrão aceito pela API
             "first_name" => "Jogador",
             "last_name" => "Fliper",
-            "identification" => ["type" => "CPF", "number" => "00000000000"]
+            "identification" => [
+                "type" => "CPF", 
+                "number" => "19100000000" // CPF fictício válido para testes da API brasileira
+            ]
         ]
     ];
 
     $headers = [
         "Authorization: Bearer " . TOKEN_MERCADOPAGO,
         "Content-Type: application/json",
-        "X-Idempotency-Key: " . $id_transacao
+        "X-Idempotency-Key: " . $id_transacao,
+        "X-Melicountry: MLA" // Adiciona o cabeçalho explícito para forçar roteamento correto
     ];
 
     $ch = curl_init();
@@ -36,7 +41,6 @@ if ($acao == 'gerar') {
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
     curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($dados));
-    // Força o cURL a seguir qualquer redirecionamento interno automaticamente
     curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true); 
     $resposta = curl_exec($ch);
     curl_close($ch);
